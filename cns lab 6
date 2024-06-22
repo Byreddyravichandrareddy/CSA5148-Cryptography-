@@ -1,0 +1,76 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define ALPHABET_SIZE 26
+
+void countFrequencies(const char *ciphertext, int freq[]) {
+    int i;
+    for (i = 0; ciphertext[i] != '\0'; i++) {
+        if (ciphertext[i] >= 'A' && ciphertext[i] <= 'Z') {
+            freq[ciphertext[i] - 'A']++;
+        }
+    }
+}
+
+int gcd(int a, int b) {
+    int temp;
+    while (b != 0) {
+        temp = b;
+        b = a % b;
+        a = temp;
+    }
+    return a;
+}
+
+void decrypt(const char *ciphertext, int a, int b) {
+    int i;
+    char plaintext[strlen(ciphertext) + 1];
+    
+    for (i = 0; ciphertext[i] != '\0'; i++) {
+        if (ciphertext[i] >= 'A' && ciphertext[i] <= 'Z') {
+            
+            int c = ciphertext[i] - 'A';
+            int inverse_a = 0;
+            while ((a * inverse_a) % ALPHABET_SIZE != 1) {
+                inverse_a++;
+            }
+            int plain_char = (inverse_a * (c - b + ALPHABET_SIZE)) % ALPHABET_SIZE;
+            plaintext[i] = plain_char + 'A';
+        } else {
+            plaintext[i] = ciphertext[i]; 
+        }
+    }
+    plaintext[i] = '\0';
+    
+    printf("Decrypted plaintext: %s\n", plaintext);
+}
+
+int main() {
+    const char *ciphertext = "YOUR CIPHERTEXT HERE";
+    
+    int freq[ALPHABET_SIZE] = {0};
+    countFrequencies(ciphertext, freq);
+    
+    int maxFreq = 0, secondMaxFreq = 0;
+    char mostFreqChar, secondMostFreqChar;
+    
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        if (freq[i] > maxFreq) {
+            secondMaxFreq = maxFreq;
+            maxFreq = freq[i];
+            secondMostFreqChar = mostFreqChar;
+            mostFreqChar = 'A' + i;
+        } else if (freq[i] > secondMaxFreq) {
+            secondMaxFreq = freq[i];
+            secondMostFreqChar = 'A' + i;
+        }
+    }
+    int a, b;
+    a = 5; 
+    b = ('E' - 'A' - ('B' - 'A') * a + ALPHABET_SIZE) % ALPHABET_SIZE; 
+
+    decrypt(ciphertext, a, b);
+
+    return 0;
+}
