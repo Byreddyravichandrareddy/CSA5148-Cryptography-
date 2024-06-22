@@ -1,0 +1,90 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define MOD 26 
+
+int modInverse(int a, int m) {
+    a = a % m;
+    for (int x = 1; x < m; x++) {
+        if ((a * x) % m == 1) {
+            return x;
+        }
+    }
+    return -1; 
+}
+
+int determinant(int key[2][2]) {
+    return key[0][0] * key[1][1] - key[0][1] * key[1][0];
+}
+
+void cofactor(int key[2][2], int cofact[2][2]) {
+    cofact[0][0] = key[1][1];
+    cofact[0][1] = -key[0][1];
+    cofact[1][0] = -key[1][0];
+    cofact[1][1] = key[0][0];
+}
+
+
+void adjoint(int key[2][2], int adj[2][2]) {
+    adj[0][0] = key[1][1];
+    adj[0][1] = -key[0][1];
+    adj[1][0] = -key[1][0];
+    adj[1][1] = key[0][0];
+}
+
+void inverse(int key[2][2], int inv[2][2]) {
+    int det = determinant(key);
+    int detInv = modInverse(det, MOD);
+    
+    int adj[2][2];
+    adjoint(key, adj);
+    
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; j++) {
+            inv[i][j] = (adj[i][j] * detInv) % MOD;
+            if (inv[i][j] < 0) {
+                inv[i][j] += MOD;
+            }
+        }
+    }
+}
+
+void decrypt(int cipherText[2], int key[2][2], char *plainText) {
+    int invKey[2][2];
+    inverse(key, invKey);
+    
+    int plaintextNum[2];
+    for (int i = 0; i < 2; i++) {
+        plaintextNum[i] = 0;
+        for (int j = 0; j < 2; j++) {
+            plaintextNum[i] += invKey[i][j] * cipherText[j];
+        }
+        plaintextNum[i] = plaintextNum[i] % MOD;
+        if (plaintextNum[i] < 0) {
+            plaintextNum[i] += MOD;
+        }
+    }
+    
+    plainText[0] = (char)(plaintextNum[0] + 'a');
+    plainText[1] = (char)(plaintextNum[1] + 'a');
+    plainText[2] = '\0';
+}
+
+int main() {
+
+    int key[2][2] = {{3, 2}, {5, 7}}; 
+    int cipherText1[2] = {19, 1}; 
+    int cipherText2[2] = {7, 14}; 
+    
+    char plainText1[3];
+    char plainText2[3];
+    
+    decrypt(cipherText1, key, plainText1);
+    decrypt(cipherText2, key, plainText2);
+    
+    printf("Decrypted plaintext 1: %s\n", plainText1);
+    printf("Decrypted plaintext 2: %s\n", plainText2);
+    
+    return 0;
+}
