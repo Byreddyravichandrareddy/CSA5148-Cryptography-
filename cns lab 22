@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define BLOCK_SIZE 16 
+
+void encrypt_block(unsigned char *plaintext, unsigned char *ciphertext) {
+     
+    for (int i = 0; i < BLOCK_SIZE; ++i) {
+        ciphertext[i] = plaintext[i];
+    }
+}
+
+void decrypt_block(unsigned char *ciphertext, unsigned char *plaintext) {
+   
+    for (int i = 0; i < BLOCK_SIZE; ++i) {
+        plaintext[i] = ciphertext[i];
+    }
+}
+ 
+void ecb_encrypt(unsigned char *input, unsigned char *output, int length) {
+    int num_blocks = length / BLOCK_SIZE;
+    for (int i = 0; i < num_blocks; ++i) {
+        encrypt_block(input + i * BLOCK_SIZE, output + i * BLOCK_SIZE);
+    }
+}
+ 
+void ecb_decrypt(unsigned char *input, unsigned char *output, int length) {
+    int num_blocks = length / BLOCK_SIZE;
+    for (int i = 0; i < num_blocks; ++i) {
+        decrypt_block(input + i * BLOCK_SIZE, output + i * BLOCK_SIZE);
+    }
+}
+
+int main() {
+    unsigned char plaintext[] = "Hello, ECB Mode!";
+    unsigned char ciphertext[sizeof(plaintext)];
+    unsigned char decrypted[sizeof(plaintext)];
+
+    ecb_encrypt(plaintext, ciphertext, sizeof(plaintext));
+
+    ecb_decrypt(ciphertext, decrypted, sizeof(plaintext));
+    decrypted[sizeof(plaintext) - 1] = '\0'; 
+
+    printf("Plaintext: %s\n", plaintext);
+    printf("Ciphertext (hex): ");
+    for (int i = 0; i < sizeof(plaintext); ++i) {
+        printf("%02x", ciphertext[i]);
+    }
+    printf("\n");
+    printf("Decrypted: %s\n", decrypted);
+
+    return 0;
+}
