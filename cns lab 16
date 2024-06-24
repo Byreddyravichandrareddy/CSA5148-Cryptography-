@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+float english_freq[] = {8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 6.094, 6.966, 0.153, 0.772, 4.025,
+                        2.406, 6.749, 7.507, 1.929, 0.095, 5.987, 6.327, 9.056, 2.758, 0.978, 2.360, 0.150,
+                        1.974, 0.074};
+
+void calculate_frequencies(const char *text, int *freq) {
+    memset(freq, 0, 26 * sizeof(int));
+    int len = strlen(text);
+    for (int i = 0; i < len; i++) {
+        char ch = tolower(text[i]);
+        if (isalpha(ch)) {
+            freq[ch - 'a']++;
+        }
+    }
+}
+
+void decrypt_text(const char *ciphertext, const char *cipher_key, char *plaintext) {
+    int len = strlen(ciphertext);
+    for (int i = 0; i < len; i++) {
+        char ch = ciphertext[i];
+        if (isalpha(ch)) {
+            if (isupper(ch)) {
+                plaintext[i] = toupper(cipher_key[ch - 'A']);
+            } else {
+                plaintext[i] = tolower(cipher_key[ch - 'a']);
+            }
+        } else {
+            plaintext[i] = ch;
+        }
+    }
+    plaintext[len] = '\0';
+}
+
+void frequency_attack(const char *ciphertext, int num_results) {
+    int freq[26] = {0};
+    calculate_frequencies(ciphertext, freq);
+
+    int sorted_freq[26];
+    memcpy(sorted_freq, freq, 26 * sizeof(int));
+    qsort(sorted_freq, 26, sizeof(int), [](const void *a, const void *b) {
+        return (*(int *)b - *(int *)a);
+    });
+
+    char plaintext[1000];
+    for (int i = 0; i < 26; i++) {
+        char cipher_key[26];
+        for (int j = 0; j < 26; j++) {
+            int index = (j + i) % 26;
+            cipher_key[j] = 'a' + index;
+        }
+        decrypt_text(ciphertext, cipher_key, plaintext);
+        printf("Plaintext attempt %d (based on frequency match):\n", i + 1);
+        printf("%s\n", plaintext);
+        printf("\n");
+        if (i + 1 >= num_results) break;
+    }
+}
+
+int main() {
+    char ciphertext[1000];
+    printf("Enter the ciphertext: ");
+    fgets(ciphertext, sizeof(ciphertext), stdin);
+    ciphertext[strcspn(ciphertext, "\n")] = '\0'; 
+
+    int num_results;
+    printf("Enter the number of top plaintexts to show: ");
+    scanf("%d", &num_results);
+
+    printf("\nPerforming frequency analysis attack...\n\n");
+    frequency_attack(ciphertext, num_results);
+
+    return 0;
+}
