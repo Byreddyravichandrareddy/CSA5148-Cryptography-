@@ -1,0 +1,61 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MOD 27  
+
+int keyMatrix[2][2] = {
+    {9, 4},
+    {5, 7}
+};
+void hillEncrypt(char message[]) {
+    int len = strlen(message);
+    int i, j;
+    
+    int numeric[len];
+    for (i = 0; i < len; i++) {
+        if (message[i] == ' ') {
+            numeric[i] = 26;  
+        } else {
+            numeric[i] = message[i] - 'a';  
+        }
+    }
+    
+    for (i = 0; i < len; i += 2) {
+       
+        int vector[2];
+        vector[0] = numeric[i];
+        if (i + 1 < len) {
+            vector[1] = numeric[i + 1];
+        } else {
+            vector[1] = 26;  
+        }
+        
+        int result[2] = {0};
+        for (j = 0; j < 2; j++) {
+            result[j] += keyMatrix[j][0] * vector[0];
+            result[j] += keyMatrix[j][1] * vector[1];
+            result[j] %= MOD;  
+        }
+        
+        
+        for (j = 0; j < 2; j++) {
+            if (result[j] == 26) {
+                printf(" ");  
+            } else {
+                printf("%c", 'a' + result[j]);  
+            }
+        }
+    }
+    printf("\n");
+}
+
+int main() {
+    char message[] = "meet me at the usual place at ten rather than eight oclock";
+    
+    printf("Original message: %s\n", message);
+    printf("Encrypted message: ");
+    hillEncrypt(message);
+    
+    return 0;
+}
