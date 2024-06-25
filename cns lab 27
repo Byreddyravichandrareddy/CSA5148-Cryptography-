@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+unsigned long long mod_exp(unsigned long long base, unsigned long long exp, unsigned long long mod) {
+    unsigned long long result = 1;
+    base = base % mod;
+    while (exp > 0) {
+        if (exp % 2 == 1) {
+            result = (result * base) % mod;
+        }
+        exp = exp >> 1;
+        base = (base * base) % mod;
+    }
+    return result;
+}
+
+int find_plaintext(unsigned long long ciphertext, unsigned long long* precomputed, int size) {
+    for (int i = 0; i < size; i++) {
+        if (precomputed[i] == ciphertext) {
+            return i;
+        }
+    }
+    return -1; 
+}
+
+int main() {
+    unsigned long long e = 65537; 
+    unsigned long long n = 3233;   
+ 
+    unsigned long long precomputed[26];
+    for (int i = 0; i < 26; i++) {
+        precomputed[i] = mod_exp(i, e, n);
+        printf("Plaintext %d -> Ciphertext %llu\n", i, precomputed[i]);
+    }
+ 
+    unsigned long long ciphertexts[] = {2201, 1951, 3060, 11}; 
+    int num_ciphertexts = sizeof(ciphertexts) / sizeof(ciphertexts[0]);
+ 
+    printf("Decrypted message: ");
+    for (int i = 0; i < num_ciphertexts; i++) {
+        int plaintext = find_plaintext(ciphertexts[i], precomputed, 26);
+        if (plaintext != -1) {
+            printf("%c", 'A' + plaintext);
+        } else {
+            printf("?");
+        }
+    }
+    printf("\n");
+
+    return 0;
+}
